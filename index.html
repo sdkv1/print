@@ -10,6 +10,18 @@
         body { font-family: 'Inter', sans-serif; }
         .btn-press:active { transform: scale(0.97); }
         #log-area { font-family: monospace; font-size: 13px; }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+        .reconnecting::after {
+            content: '';
+            position: absolute;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            border: 2px solid #f59e0b;
+            animation: pulse-ring 1.5s infinite;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
@@ -30,15 +42,20 @@
             <!-- Status Device -->
             <div class="flex items-center justify-between bg-gray-50 rounded-xl p-4 border border-gray-200">
                 <div class="flex items-center gap-3">
-                    <div id="status-dot" class="w-3 h-3 rounded-full bg-red-500 transition-colors"></div>
+                    <div id="status-dot" class="w-3 h-3 rounded-full bg-red-500 transition-colors relative"></div>
                     <div>
                         <p class="text-sm font-semibold text-gray-700">Status Printer</p>
                         <p id="status-text" class="text-xs text-gray-500">Belum terhubung</p>
                     </div>
                 </div>
-                <button onclick="connectPrinter()" class="btn-press bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-                    Scan & Connect
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="reconnectPrinter()" id="btn-reconnect" class="hidden btn-press bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium px-3 py-2 rounded-lg transition-colors">
+                        Reconnect
+                    </button>
+                    <button onclick="connectPrinter()" id="btn-scan" class="btn-press bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+                        Scan & Connect
+                    </button>
+                </div>
             </div>
 
             <!-- Info Device -->
@@ -106,13 +123,16 @@
 let device = null;
 let server = null;
 let characteristic = null;
+let isReconnecting = false;
+let reconnectAttempts = 0;
+const MAX_RECONNECT = 5;
 const PRINTER_SERVICE_UUID = '000018f0-0000-1000-8000-00805f9b34fb';
 const PRINTER_CHARACTERISTIC_UUID = '00002af1-0000-1000-8000-00805f9b34fb';
 
 function log(msg, type = 'info') {
     const area = document.getElementById('log-area');
     const time = new Date().toLocaleTimeString('id-ID');
-    const color = type === 'error' ? 'text-red-400' : type === 'success' ? 'text-green-400' : 'text-blue-400';
+    const color = type === 'error' ? 'text-red-400' : type === 'success' ? 'text-green-400' : type === 'warn' ? 'text-yellow-400' : 'text-blue-400';
     area.innerHTML += `<div class="${color}">[${time}] ${msg}</div>`;
     area.scrollTop = area.scrollHeight;
 }
@@ -121,24 +141,48 @@ function clearLog() {
     document.getElementById('log-area').innerHTML = '';
 }
 
-function setConnected(connected) {
+function setStatus(state) {
     const dot = document.getElementById('status-dot');
     const text = document.getElementById('status-text');
     const info = document.getElementById('device-info');
     const btns = ['btn-test', 'btn-feed', 'btn-cut'];
+    const scanBtn = document.getElementById('btn-scan');
+    const reconBtn = document.getElementById('btn-reconnect');
 
-    if (connected) {
-        dot.classList.remove('bg-red-500', 'bg-yellow-500');
+    dot.classList.remove('bg-red-500', 'bg-green-500', 'bg-yellow-500', 'reconnecting');
+
+    if (state === 'connected') {
         dot.classList.add('bg-green-500');
         text.textContent = 'Terhubung';
         info.classList.remove('hidden');
         btns.forEach(id => document.getElementById(id).disabled = false);
+        scanBtn.classList.remove('hidden');
+        reconBtn.classList.add('hidden');
+        isReconnecting = false;
+        reconnectAttempts = 0;
+    } else if (state === 'reconnecting') {
+        dot.classList.add('bg-yellow-500', 'reconnecting');
+        text.textContent = `Reconnecting... (${reconnectAttempts}/${MAX_RECONNECT})`;
+        info.classList.remove('hidden');
+        btns.forEach(id => document.getElementById(id).disabled = true);
+        scanBtn.classList.add('hidden');
+        reconBtn.classList.add('hidden');
+    } else if (state === 'disconnected') {
+        dot.classList.add('bg-red-500');
+        text.textContent = 'Terputus - Klik Reconnect';
+        info.classList.remove('hidden');
+        btns.forEach(id => document.getElementById(id).disabled = true);
+        scanBtn.classList.remove('hidden');
+        reconBtn.classList.remove('hidden');
+        isReconnecting = false;
     } else {
-        dot.classList.remove('bg-green-500', 'bg-yellow-500');
         dot.classList.add('bg-red-500');
         text.textContent = 'Belum terhubung';
         info.classList.add('hidden');
         btns.forEach(id => document.getElementById(id).disabled = true);
+        scanBtn.classList.remove('hidden');
+        reconBtn.classList.add('hidden');
+        isReconnecting = false;
     }
 }
 
@@ -151,6 +195,7 @@ async function connectPrinter() {
 
     try {
         log('Memindai device Bluetooth...');
+        setStatus('scanning');
         document.getElementById('status-dot').classList.remove('bg-red-500');
         document.getElementById('status-dot').classList.add('bg-yellow-500');
         document.getElementById('status-text').textContent = 'Scanning...';
@@ -169,6 +214,16 @@ async function connectPrinter() {
         document.getElementById('device-name').textContent = device.name || 'Unknown';
         document.getElementById('device-id').textContent = device.id;
 
+        await doConnect();
+
+    } catch (err) {
+        log(`Error scan: ${err.message}`, 'error');
+        setStatus('idle');
+    }
+}
+
+async function doConnect() {
+    try {
         log('Menghubungkan ke GATT server...');
         server = await device.gatt.connect();
 
@@ -179,17 +234,79 @@ async function connectPrinter() {
         characteristic = await service.getCharacteristic(PRINTER_CHARACTERISTIC_UUID);
 
         log('Printer siap!', 'success');
-        setConnected(true);
+        setStatus('connected');
 
-        device.addEventListener('gattserverdisconnected', () => {
-            log('Printer terputus', 'error');
-            setConnected(false);
-        });
+        // Setup auto reconnect handler
+        device.removeEventListener('gattserverdisconnected', onDisconnected);
+        device.addEventListener('gattserverdisconnected', onDisconnected);
 
     } catch (err) {
-        log(`Error: ${err.message}`, 'error');
-        setConnected(false);
+        log(`Gagal connect: ${err.message}`, 'error');
+        setStatus('disconnected');
     }
+}
+
+async function reconnectPrinter() {
+    if (!device) {
+        log('Tidak ada device tersimpan. Scan dulu.', 'warn');
+        connectPrinter();
+        return;
+    }
+    if (isReconnecting) return;
+
+    isReconnecting = true;
+    reconnectAttempts = 0;
+    await tryReconnect();
+}
+
+async function tryReconnect() {
+    if (!isReconnecting) return;
+    reconnectAttempts++;
+
+    if (reconnectAttempts > MAX_RECONNECT) {
+        log('Max reconnect attempts reached. Scan ulang.', 'error');
+        setStatus('disconnected');
+        return;
+    }
+
+    setStatus('reconnecting');
+    log(`Auto reconnect attempt ${reconnectAttempts}/${MAX_RECONNECT}...`);
+
+    try {
+        if (device.gatt.connected) {
+            device.gatt.disconnect();
+        }
+    } catch(e) {}
+
+    // Delay sebelum reconnect
+    await new Promise(r => setTimeout(r, 1500));
+
+    try {
+        server = await device.gatt.connect();
+        const service = await server.getPrimaryService(PRINTER_SERVICE_UUID);
+        characteristic = await service.getCharacteristic(PRINTER_CHARACTERISTIC_UUID);
+
+        log('Reconnect berhasil!', 'success');
+        setStatus('connected');
+
+        device.removeEventListener('gattserverdisconnected', onDisconnected);
+        device.addEventListener('gattserverdisconnected', onDisconnected);
+    } catch (err) {
+        log(`Reconnect gagal: ${err.message}`, 'warn');
+        if (isReconnecting) {
+            setTimeout(tryReconnect, 2000);
+        }
+    }
+}
+
+function onDisconnected() {
+    log('Printer terputus! Mencoba auto reconnect...', 'warn');
+    setStatus('disconnected');
+
+    // Auto reconnect tanpa user klik
+    reconnectAttempts = 0;
+    isReconnecting = true;
+    setTimeout(tryReconnect, 1000);
 }
 
 // ESC/POS Helpers
@@ -235,6 +352,9 @@ async function sendData(data) {
         }
     } catch (err) {
         log(`Gagal kirim: ${err.message}`, 'error');
+        if (err.message.includes('disconnected') || err.message.includes('GATT')) {
+            onDisconnected();
+        }
     }
 }
 
