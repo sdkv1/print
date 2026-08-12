@@ -10,10 +10,10 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Print RPP20N">
     <meta name="description" content="Aplikasi test print thermal printer RPP20N via Bluetooth BLE">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/icon-192.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
     <title>Print RPP20N — Bluetooth Thermal Printer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -223,8 +223,15 @@ function setStatus(state) {
 
 async function connectPrinter() {
     if (!navigator.bluetooth) {
-        log('Web Bluetooth tidak didukung browser ini. Gunakan Chrome Android/Desktop.', 'error');
-        alert('Gunakan Chrome/Edge untuk Bluetooth. Safari iOS tidak support.');
+        log('❌ Web Bluetooth tidak didukung browser ini.', 'error');
+        log('Gunakan Chrome Android/Desktop atau Edge.', 'warn');
+        alert('Browser tidak support Bluetooth.\nGunakan Chrome Android atau Chrome/Edge Desktop.');
+        return;
+    }
+
+    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+        log('❌ Web Bluetooth WAJIB HTTPS!', 'error');
+        alert('Aplikasi harus diakses via HTTPS untuk menggunakan Bluetooth.\nPastikan URL dimulai dengan https://');
         return;
     }
 
@@ -245,14 +252,23 @@ async function connectPrinter() {
             optionalServices: [PRINTER_SERVICE_UUID]
         });
 
-        log(`Device ditemukan: ${device.name || 'Unknown'}`, 'success');
+        log('✅ Device ditemukan: ' + (device.name || 'Unknown'), 'success');
         document.getElementById('device-name').textContent = device.name || 'Unknown';
         document.getElementById('device-id').textContent = device.id;
 
         await doConnect();
 
     } catch (err) {
-        log(`Error scan: ${err.message}`, 'error');
+        if (err.name === 'NotFoundError') {
+            log('❌ Tidak ada printer ditemukan dalam jangkauan.', 'error');
+            log('Pastikan printer RPP20N sudah ON dan pairing mode.', 'warn');
+        } else if (err.name === 'SecurityError') {
+            log('❌ Permission ditolak atau butuh HTTPS.', 'error');
+        } else if (err.name === 'NotSupportedError') {
+            log('❌ Browser tidak support Bluetooth LE.', 'error');
+        } else {
+            log('❌ Error scan: ' + err.message, 'error');
+        }
         setStatus('idle');
     }
 }
@@ -261,22 +277,27 @@ async function doConnect() {
     try {
         log('Menghubungkan ke GATT server...');
         server = await device.gatt.connect();
+        log('✅ GATT server terhubung', 'success');
 
         log('Mengakses service printer...');
         const service = await server.getPrimaryService(PRINTER_SERVICE_UUID);
+        log('✅ Service printer ditemukan', 'success');
 
         log('Mengakses characteristic...');
         characteristic = await service.getCharacteristic(PRINTER_CHARACTERISTIC_UUID);
+        log('✅ Characteristic siap!', 'success');
 
-        log('Printer siap!', 'success');
         setStatus('connected');
+        log('🎉 Printer siap digunakan!', 'success');
 
-        // Setup auto reconnect handler
         device.removeEventListener('gattserverdisconnected', onDisconnected);
         device.addEventListener('gattserverdisconnected', onDisconnected);
 
     } catch (err) {
-        log(`Gagal connect: ${err.message}`, 'error');
+        log('❌ Gagal connect: ' + err.message, 'error');
+        if (err.message.includes('service')) {
+            log('Pastikan printer support UUID: ' + PRINTER_SERVICE_UUID, 'warn');
+        }
         setStatus('disconnected');
     }
 }
@@ -482,7 +503,7 @@ setInterval(() => {
     Printer: RPP20N`;
 }, 1000);
 
-log('Siap. Klik "Scan & Connect" untuk mulai.');
+
     log('App version: v' + APP_VERSION, 'success');
 
     // SW status check
@@ -507,6 +528,90 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.log('SW registration failed:', err));
     });
 }
+
+
+// ===== PWA INSTALL PROMPT =====
+let deferredPrompt = null;
+const installBanner = document.getElementById('install-banner');
+const btnInstall = document.getElementById('btn-install');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    log('PWA install prompt tersedia. Klik Install di banner atas.', 'success');
+    installBanner.classList.remove('hidden');
+});
+
+btnInstall.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+        log('PWA berhasil di-install!', 'success');
+        installBanner.classList.add('hidden');
+    } else {
+        log('PWA install ditolak user.', 'warn');
+    }
+    deferredPrompt = null;
+});
+
+window.addEventListener('appinstalled', () => {
+    log('Aplikasi berhasil di-install ke perangkat!', 'success');
+    installBanner.classList.add('hidden');
+    deferredPrompt = null;
+});
+
+// ===== SERVICE WORKER =====
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => {
+                console.log('[App] SW registered:', reg.scope);
+                const swStatus = document.getElementById('sw-status');
+                if (swStatus) {
+                    swStatus.textContent = 'SW: Active v' + APP_VERSION;
+                    swStatus.classList.add('text-green-500');
+                }
+                log('Service Worker aktif v' + APP_VERSION, 'success');
+                reg.update();
+            })
+            .catch(err => {
+                console.log('[App] SW failed:', err);
+                const swStatus = document.getElementById('sw-status');
+                if (swStatus) {
+                    swStatus.textContent = 'SW: Failed';
+                    swStatus.classList.add('text-red-500');
+                }
+                log('SW gagal: ' + err.message, 'error');
+            });
+    });
+} else {
+    const swStatus = document.getElementById('sw-status');
+    if (swStatus) {
+        swStatus.textContent = 'SW: Not Supported';
+    }
+    log('Browser tidak support Service Worker', 'warn');
+}
+
+// ===== INIT LOG =====
+log('🚀 Print RPP20N v' + APP_VERSION + ' siap.');
+log('Klik "Scan & Connect" untuk mulai.');
+
+if (window.location.protocol === 'https:') {
+    log('✅ HTTPS aktif — Bluetooth bisa digunakan.', 'success');
+} else if (window.location.hostname === 'localhost') {
+    log('ℹ️ Localhost — Bluetooth mungkin work.', 'warn');
+} else {
+    log('⚠️ Bukan HTTPS! Bluetooth TIDAK AKAN WORK.', 'error');
+    log('Deploy ke Vercel untuk HTTPS otomatis.', 'warn');
+}
+
+if (navigator.bluetooth) {
+    log('✅ Web Bluetooth API tersedia.', 'success');
+} else {
+    log('❌ Web Bluetooth TIDAK tersedia.', 'error');
+}
+
 </script>
 
 </body>
