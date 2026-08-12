@@ -181,6 +181,23 @@
             margin: 0 auto 1rem auto;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .app-footer {
+            flex-shrink: 0;
+            text-align: center;
+            padding: 0.5rem 0;
+            font-size: 0.75rem;
+            color: #9ca3af;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+        }
+        .app-footer span {
+            background: rgba(37, 99, 235, 0.08);
+            color: #2563eb;
+            padding: 0.15rem 0.5rem;
+            border-radius: 6px;
+            font-family: monospace;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body>
@@ -209,6 +226,7 @@
                 <span>KLAIM GARANSI</span>
             </button>
         </div>
+        <div class="app-footer">Print RPP20N — <span>v2.5.2</span></div>
     </div>
 
     <!-- POPUP: SEDANG MENCETAK -->
@@ -234,7 +252,7 @@
     </div>
 
 <script>
-const APP_VERSION = '2.5.1';
+const APP_VERSION = '2.5.2';
 
 // ===== POPUP FUNCTIONS =====
 function showPopup(id) {
