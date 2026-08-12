@@ -15,8 +15,16 @@ function updateClock() {
     const el = document.getElementById('clock');
     if (el) el.textContent = new Date().toLocaleTimeString('id-ID', { hour12: false });
 }
-setInterval(updateClock, 1000);
-updateClock();
+// Tunggu DOM siap baru jalankan clock
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        updateClock();
+        setInterval(updateClock, 1000);
+    });
+} else {
+    updateClock();
+    setInterval(updateClock, 1000);
+}
 
 // ===== FULLSCREEN =====
 function toggleFullscreen() {
