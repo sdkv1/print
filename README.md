@@ -83,6 +83,11 @@ Aplikasi mendukung **landscape (lancap)** dan **portrait (potret)** secara otoma
 
 ## 📋 Changelog
 
+### v2.1.0 (12 Agustus 2026)
+- 🐛 **Fix bug kritis**: syntax error (triple-quote + variabel `APP_VERSION` tidak terdeklarasi) yang bikin seluruh script gagal jalan — semua tombol termasuk Scan & Connect tidak merespons
+- 📐 Layout landscape otomatis jadi 2 kolom saat layar pendek (kontrol+preview di kiri, console log di kanan)
+- 🔄 Body scrollable penuh di semua orientasi, konten tidak lagi terpotong
+
 ### v2.0.0 (12 Agustus 2026)
 - ✅ Progressive Web App (PWA) support
 - ✅ Offline caching via Service Worker
