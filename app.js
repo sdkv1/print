@@ -86,4 +86,25 @@ async function printAntrian(layanan) {
     hidePopup('popup-printing');
 }
 
+// ===== CLEAR CACHE =====
+async function clearAppCache() {
+    showPopup('popup-clearing');
+    try {
+        // Unregister all service workers
+        if ('serviceWorker' in navigator) {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(r => r.unregister()));
+        }
+        // Delete all caches
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(n => caches.delete(n)));
+        hidePopup('popup-clearing');
+        showPopup('popup-cleared');
+        console.log('[App] Cache cleared');
+    } catch (e) {
+        hidePopup('popup-clearing');
+        alert('Gagal clear cache: ' + e.message);
+    }
+}
+
 console.log('[App] Module loaded v' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : 'unknown'));
