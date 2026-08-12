@@ -77,3 +77,22 @@ Aplikasi ini sekarang adalah **Progressive Web App** yang bisa di-install ke hom
 Aplikasi mendukung **landscape (lancap)** dan **portrait (potret)** secara otomatis:
 - Saat di-install, aplikasi akan menyesuaikan orientasi layar perangkat
 - Tidak ada batasan orientasi — user bebas memutar device
+
+
+---
+
+## 📋 Changelog
+
+### v2.0.0 (12 Agustus 2026)
+- ✅ Progressive Web App (PWA) support
+- ✅ Offline caching via Service Worker
+- ✅ Installable ke homescreen (Android, iOS, Desktop)
+- ✅ Support orientasi landscape & portrait
+- ✅ App version badge di UI
+- ✅ Auto reconnect printer (max 5x)
+
+### v1.0.0 (27 Juli 2026)
+- 🖨️ Test print RPP20N via Bluetooth BLE
+- 📱 Responsive design (Tailwind CSS)
+- 🔍 Scan & connect printer
+- 📝 ESC/POS commands (feed, cut, bold, align)
