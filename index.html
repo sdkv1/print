@@ -566,34 +566,49 @@ document.addEventListener('fullscreenchange', () => {
 
 // ===== PWA INSTALL PROMPT =====
 let deferredPrompt = null;
-const installBanner = document.getElementById('install-banner');
-const btnInstall = document.getElementById('btn-install');
 
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    log('PWA install prompt tersedia. Klik Install di banner atas.', 'success');
-    installBanner.classList.remove('hidden');
-});
+function initPWA() {
+    const installBanner = document.getElementById('install-banner');
+    const btnInstall = document.getElementById('btn-install');
 
-btnInstall.addEventListener('click', async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-        log('PWA berhasil di-install!', 'success');
-        installBanner.classList.add('hidden');
-    } else {
-        log('PWA install ditolak user.', 'warn');
+    if (!installBanner || !btnInstall) {
+        console.warn('[PWA] Banner elements not found');
+        return;
     }
-    deferredPrompt = null;
-});
 
-window.addEventListener('appinstalled', () => {
-    log('Aplikasi berhasil di-install ke perangkat!', 'success');
-    installBanner.classList.add('hidden');
-    deferredPrompt = null;
-});
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        log('PWA install prompt tersedia. Klik Install di banner atas.', 'success');
+        installBanner.classList.remove('hidden');
+    });
+
+    btnInstall.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            log('PWA berhasil di-install!', 'success');
+            installBanner.classList.add('hidden');
+        } else {
+            log('PWA install ditolak user.', 'warn');
+        }
+        deferredPrompt = null;
+    });
+
+    window.addEventListener('appinstalled', () => {
+        log('Aplikasi berhasil di-install ke perangkat!', 'success');
+        installBanner.classList.add('hidden');
+        deferredPrompt = null;
+    });
+}
+
+// Init setelah DOM ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPWA);
+} else {
+    initPWA();
+}
 
 // ===== SERVICE WORKER =====
 if ('serviceWorker' in navigator) {
