@@ -1,4 +1,4 @@
-const APP_VERSION = '2.5.2';
+const APP_VERSION = '2.5.3';
 const CACHE_NAME = `print-rpp20n-v${APP_VERSION}`;
 
 // Helper: convert relative path to absolute URL based on SW location
