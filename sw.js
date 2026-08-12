@@ -1,11 +1,11 @@
 const APP_VERSION = '2.1.0';
 const CACHE_NAME = `print-rpp20n-v${APP_VERSION}`;
 const STATIC_ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -55,7 +55,7 @@ self.addEventListener('fetch', (event) => {
         caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
         return response;
       }).catch(() => {
-        if (request.destination === 'document') return caches.match('./index.html');
+        if (request.destination === 'document') return caches.match('/index.html');
       });
     })
   );
