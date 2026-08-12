@@ -33,11 +33,18 @@
             border: 2px solid #f59e0b;
             animation: pulse-ring 1.5s infinite;
         }
+        /* Landscape: layar HP pendek - biar konten tidak kepotong & pakai lebar layar lebih optimal */
+        @media (orientation: landscape) and (max-height: 500px) {
+            body { align-items: flex-start; padding: 12px; }
+            .app-card { max-width: 720px; }
+            .app-grid-landscape { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; align-items: start; }
+            .app-grid-landscape > .mt-5 { margin-top: 0; }
+        }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 overflow-y-auto">
 
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
+    <div class="app-card bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
         <!-- Header -->
         <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
             <h1 class="text-xl font-bold flex items-center gap-2">
@@ -50,7 +57,8 @@
             <span class="inline-block mt-2 px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-xs font-mono text-blue-50 border border-white/10">v2.0.0</span>
         </div>
 
-        <div class="p-6 space-y-5">
+        <div class="p-6 app-grid-landscape">
+          <div class="space-y-5">
             <!-- Status Device -->
             <div class="flex items-center justify-between bg-gray-50 rounded-xl p-4 border border-gray-200">
                 <div class="flex items-center gap-3">
@@ -119,7 +127,9 @@
     Printer: RPP20N
                 </div>
             </div>
+          </div>
 
+          <div class="mt-5">
             <!-- Log -->
             <div class="bg-gray-900 rounded-xl p-4">
                 <div class="flex items-center justify-between mb-2">
@@ -132,6 +142,7 @@
                     <span id="sw-status" class="text-[10px] text-gray-500 font-mono">Checking SW...</span>
                 </div>
             </div>
+          </div>
         </div>
     </div>
 
@@ -142,6 +153,7 @@ let characteristic = null;
 let isReconnecting = false;
 let reconnectAttempts = 0;
 const MAX_RECONNECT = 5;
+const APP_VERSION = '2.0.0';
 const PRINTER_SERVICE_UUID = '000018f0-0000-1000-8000-00805f9b34fb';
 const PRINTER_CHARACTERISTIC_UUID = '00002af1-0000-1000-8000-00805f9b34fb';
 
@@ -464,12 +476,12 @@ setInterval(() => {
 }, 1000);
 
 log('Siap. Klik "Scan & Connect" untuk mulai.');
-    log('App version: v''' + APP_VERSION + '''', 'success');
+    log('App version: v' + APP_VERSION, 'success');
 
     // SW status check
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.ready.then(reg => {
-            document.getElementById('sw-status').textContent = 'SW: Active v''' + APP_VERSION + '''';
+            document.getElementById('sw-status').textContent = 'SW: Active v' + APP_VERSION;
             document.getElementById('sw-status').classList.add('text-green-500');
         }).catch(() => {
             document.getElementById('sw-status').textContent = 'SW: Failed';
