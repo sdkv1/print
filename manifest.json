@@ -1,27 +1,36 @@
 {
-  "name": "Test Print RPP20N",
+  "id": "/",
+  "name": "Print RPP20N",
   "short_name": "Print RPP20N",
   "description": "Aplikasi test print thermal printer RPP20N via Bluetooth BLE",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": [
+    "standalone",
+    "fullscreen"
+  ],
+  "orientation": "any",
   "background_color": "#f3f4f6",
   "theme_color": "#2563eb",
-  "orientation": "any",
-  "scope": "/",
+  "version": "2.1.0",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
-  "version": "2.0.0",
-  "id": "print-rpp20n"
+  "categories": [
+    "utilities",
+    "productivity"
+  ],
+  "lang": "id"
 }
