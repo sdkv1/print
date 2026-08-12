@@ -1,4 +1,5 @@
-const CACHE_NAME = 'print-rpp20n-v1';
+const APP_VERSION = '2.0.0';
+const CACHE_NAME = `print-rpp20n-v2.0.0`;
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -12,7 +13,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(STATIC_ASSETS);
-    }).then(() => self.skipWaiting())
+    }).then(() => self.skipWaiting().then(() => console.log(`[SW] v${APP_VERSION} installed`)))
   );
 });
 
