@@ -1,5 +1,5 @@
 // ===== PRINTER.JS — Koneksi Bluetooth & ESC/POS Commands =====
-const APP_VERSION = '2.5.5';
+const APP_VERSION = '2.5.6';
 
 let device = null;
 let server = null;
