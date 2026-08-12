@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "Print RPP20N",
-  "short_name": "Print RPP20N",
+  "name": "Nomor Antrian",
+  "short_name": "Antrian",
   "description": "Aplikasi test print thermal printer RPP20N via Bluetooth BLE",
   "start_url": "./",
   "scope": "./",
@@ -12,7 +12,7 @@
   "orientation": "any",
   "background_color": "#f3f4f6",
   "theme_color": "#2563eb",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "icons": [
     {
       "src": "./icon-192.png",
