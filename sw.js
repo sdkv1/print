@@ -1,4 +1,4 @@
-const APP_VERSION = '2.5.3';
+const APP_VERSION = '2.5.4';
 const CACHE_NAME = `print-rpp20n-v${APP_VERSION}`;
 
 // Helper: convert relative path to absolute URL based on SW location
@@ -8,7 +8,8 @@ const STATIC_ASSETS = [
   toURL('./index.html'),
   toURL('./manifest.json'),
   toURL('./icon-192.png'),
-  toURL('./icon-512.png')
+  toURL('./icon-512.png',
+  './app.js')
 ];
 
 async function cacheAsset(cache, url) {
