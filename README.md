@@ -83,7 +83,7 @@ Aplikasi mendukung **landscape (lancap)** dan **portrait (potret)** secara otoma
 
 ## 📋 Changelog
 
-### v2.2.0 (12 Agustus 2026)
+### v2.3.0 (12 Agustus 2026)
 - 🔼 Upgrade app version dari `2.1.1` ke `2.1.2`
 - 🔧 Sinkronkan `APP_VERSION` di `index.html`, `sw.js`, dan `manifest.json`
 
