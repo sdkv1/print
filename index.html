@@ -226,7 +226,31 @@
                 <span>KLAIM GARANSI</span>
             </button>
         </div>
-        <div class="app-footer">Print RPP20N — <span>v2.5.5</span></div>
+        <div class="app-footer">
+            Print RPP20N — <span>v2.5.6</span>
+            <button onclick="clearAppCache()" style="margin-left:8px;background:#e5e7eb;color:#374151;border:none;padding:2px 8px;border-radius:6px;font-size:0.7rem;font-weight:600;cursor:pointer;">Clear Cache</button>
+        </div>
+    </div>
+
+    <!-- POPUP: SEDANG CLEAR CACHE -->
+    <div id="popup-clearing" class="popup-overlay">
+        <div class="popup-card">
+            <div class="spinner"></div>
+            <div class="popup-title">Menghapus Cache...</div>
+            <div class="popup-msg">Mohon tunggu sebentar.</div>
+        </div>
+    </div>
+
+    <!-- POPUP: CACHE BERHASIL DIHAPUS -->
+    <div id="popup-cleared" class="popup-overlay">
+        <div class="popup-card">
+            <div class="popup-icon">🗑️</div>
+            <div class="popup-title">Cache Dihapus</div>
+            <div class="popup-msg">Semua cache berhasil dihapus. Silahkan refresh halaman.</div>
+            <div class="popup-btn-row">
+                <button class="popup-btn" onclick="hidePopup('popup-cleared'); location.reload();">Refresh</button>
+            </div>
+        </div>
     </div>
 
     <!-- POPUP: SEDANG MENCETAK -->
