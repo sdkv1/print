@@ -1,4 +1,4 @@
-const APP_VERSION = '2.1.0';
+const APP_VERSION = '2.1.1';
 const CACHE_NAME = `print-rpp20n-v${APP_VERSION}`;
 const STATIC_ASSETS = [
   '/',
