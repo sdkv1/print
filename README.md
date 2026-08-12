@@ -39,3 +39,41 @@ vercel --prod
 - HTML5 + Tailwind CSS
 - Web Bluetooth API
 - ESC/POS Commands
+
+
+## 🚀 PWA Support (v2)
+
+Aplikasi ini sekarang adalah **Progressive Web App** yang bisa di-install ke homescreen:
+
+| Fitur PWA | Status |
+|-----------|--------|
+| 📲 Install ke Homescreen | ✅ |
+| 🔄 Offline Support | ✅ (cache-first) |
+| 🔄 Auto Reconnect Printer | ✅ |
+| 📐 Landscape & Portrait | ✅ (`orientation: any`) |
+| 🍎 iOS Web App | ✅ (apple-mobile-web-app) |
+| 🎨 Theme Color | ✅ Blue `#2563eb` |
+
+### Cara Install
+
+**Android (Chrome):**
+1. Buka URL deploy di Chrome
+2. Klik menu ⋮ → "Tambahkan ke Layar Utama" / "Add to Home Screen"
+3. Aplikasi akan muncul di homescreen dengan icon printer
+
+**iOS (Safari):**
+1. Buka URL di Safari
+2. Klik tombol Share (⬆️)
+3. Pilih "Add to Home Screen"
+4. Aplikasi akan muncul di homescreen
+
+**Desktop (Chrome/Edge):**
+1. Buka URL di Chrome/Edge
+2. Klik icon ➕ di address bar ("Install Print RPP20N")
+3. Aplikasi akan terbuka sebagai window standalone
+
+### Orientasi Layar
+
+Aplikasi mendukung **landscape (lancap)** dan **portrait (potret)** secara otomatis:
+- Saat di-install, aplikasi akan menyesuaikan orientasi layar perangkat
+- Tidak ada batasan orientasi — user bebas memutar device
