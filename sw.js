@@ -1,55 +1,69 @@
-const APP_VERSION = '2.0.0';
-const CACHE_NAME = `print-rpp20n-v2.0.0`;
+const APP_VERSION = '2.1.0';
+const CACHE_NAME = `print-rpp20n-v${APP_VERSION}`;
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png'
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
-// Install: cache static assets
 self.addEventListener('install', (event) => {
+  console.log(`[SW] Installing v${APP_VERSION}...`);
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(STATIC_ASSETS);
-    }).then(() => self.skipWaiting().then(() => console.log(`[SW] v${APP_VERSION} installed`)))
+    }).then(() => {
+      console.log(`[SW] v${APP_VERSION} installed & cached`);
+      return self.skipWaiting();
+    })
   );
 });
 
-// Activate: clean old caches
 self.addEventListener('activate', (event) => {
+  console.log(`[SW] Activating v${APP_VERSION}...`);
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames
           .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
+          .map((name) => {
+            console.log(`[SW] Deleting old cache: ${name}`);
+            return caches.delete(name);
+          })
       );
     }).then(() => self.clients.claim())
   );
 });
 
-// Fetch: cache-first strategy
 self.addEventListener('fetch', (event) => {
+  const { request } = event;
+
+  // Skip non-GET requests
+  if (request.method !== 'GET') return;
+
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((response) => {
-        // Cache new static assets
-        if (event.request.method === 'GET' && 
-            (event.request.destination === 'document' || 
-             event.request.destination === 'script' || 
-             event.request.destination === 'style' || 
-             event.request.destination === 'image')) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+    caches.match(request).then((cached) => {
+      if (cached) {
+        // Return cached but also fetch update in background
+        fetch(request).then((response) => {
+          if (response && response.status === 200) {
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, response));
+          }
+        }).catch(() => {});
+        return cached;
+      }
+
+      return fetch(request).then((response) => {
+        if (!response || response.status !== 200 || response.type !== 'basic') {
+          return response;
         }
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
         return response;
       }).catch(() => {
-        // Fallback for offline
-        if (event.request.destination === 'document') {
-          return caches.match('/index.html');
+        if (request.destination === 'document') {
+          return caches.match('./index.html');
         }
       });
     })
