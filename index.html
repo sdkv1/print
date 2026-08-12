@@ -226,7 +226,7 @@
                 <span>KLAIM GARANSI</span>
             </button>
         </div>
-        <div class="app-footer">Print RPP20N — <span>v2.5.2</span></div>
+        <div class="app-footer">Print RPP20N — <span>v2.5.3</span></div>
     </div>
 
     <!-- POPUP: SEDANG MENCETAK -->
@@ -251,8 +251,20 @@
         </div>
     </div>
 
+    <!-- POPUP: PRINTER TERHUBUNG -->
+    <div id="popup-connected" class="popup-overlay">
+        <div class="popup-card">
+            <div class="popup-icon">✅</div>
+            <div class="popup-title">Printer Terhubung</div>
+            <div class="popup-msg" id="popup-connected-msg">Printer RPP20N siap digunakan.</div>
+            <div class="popup-btn-row">
+                <button class="popup-btn" onclick="hidePopup('popup-connected')">OK</button>
+            </div>
+        </div>
+    </div>
+
 <script>
-const APP_VERSION = '2.5.2';
+const APP_VERSION = '2.5.3';
 
 // ===== POPUP FUNCTIONS =====
 function showPopup(id) {
@@ -340,7 +352,8 @@ async function connectPrinter(){
         server=await device.gatt.connect();
         const service=await server.getPrimaryService(PRINTER_SERVICE_UUID);
         characteristic=await service.getCharacteristic(PRINTER_CHARACTERISTIC_UUID);
-        alert('✅ Printer terhubung: '+device.name);
+        document.getElementById('popup-connected-msg').textContent = 'Printer "'+device.name+'" siap digunakan.';
+        showPopup('popup-connected');
         hidePopup('popup-connect');
     }catch(e){alert('❌ Gagal: '+e.message);}
 }
