@@ -5,15 +5,15 @@
   "description": "Aplikasi test print thermal printer RPP20N via Bluetooth BLE",
   "start_url": "./",
   "scope": "./",
-  "display": "standalone",
+  "display": "fullscreen",
   "display_override": [
-    "standalone",
-    "fullscreen"
+    "fullscreen",
+    "standalone"
   ],
   "orientation": "any",
   "background_color": "#f3f4f6",
   "theme_color": "#2563eb",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "icons": [
     {
       "src": "./icon-192.png",
