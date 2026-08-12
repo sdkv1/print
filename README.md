@@ -83,6 +83,10 @@ Aplikasi mendukung **landscape (lancap)** dan **portrait (potret)** secara otoma
 
 ## 📋 Changelog
 
+### v2.1.2 (12 Agustus 2026)
+- 🔼 Upgrade app version dari `2.1.1` ke `2.1.2`
+- 🔧 Sinkronkan `APP_VERSION` di `index.html`, `sw.js`, dan `manifest.json`
+
 ### v2.1.1 (12 Agustus 2026)
 - 🐛 Fix `vercel.json`: hapus konfigurasi `builds`/`routes` yang salah (bikin `manifest.json`, `sw.js`, dan icon ke-rewrite jadi HTML / 404). Sekarang pakai zero-config static deploy Vercel
 - 🔧 Path absolut (`/icon-192.png`) di `manifest.json` dan `sw.js`, bukan relatif — lebih konsisten di berbagai scope

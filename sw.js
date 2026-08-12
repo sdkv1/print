@@ -1,6 +1,6 @@
-const APP_VERSION = '2.1.1';
+const APP_VERSION = '2.1.2';
 const CACHE_NAME = `print-rpp20n-v${APP_VERSION}`;
-const STATIC_ASSETS = ['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
+const STATIC_ASSETS = ['/','/index.html','/manifest.json','/icon-192.png','/icon-512.png'];
 
 async function cacheAsset(cache, url) {
   try {
@@ -37,6 +37,6 @@ self.addEventListener('fetch', e => {
       const clone = r.clone();
       caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
       return r;
-    }).catch(() => e.request.destination === 'document' ? caches.match('./index.html') : undefined);
+    }).catch(() => e.request.destination === 'document' ? caches.match('/index.html') : undefined);
   }));
 });
